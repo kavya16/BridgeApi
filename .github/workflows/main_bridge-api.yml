@@ -58,5 +58,5 @@ jobs:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_81954AD1FC2A4AE194D5C8A6106F4A24 }}
           package: .
           env: |
-            MONGODB_URI: ${{ secrets.MONGODB_URI }}
-            NODE_ENV: ${{ vars.NODE_ENV }}
+             MONGODB_URI=${{ secrets.MONGODB_URI }}
+             NODE_ENV=${{ vars.NODE_ENV }}
