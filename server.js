@@ -1,30 +1,20 @@
-// No need to use dotenv in production
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
-
 const express = require('express');
 const mongoose = require('mongoose');
 const http = require('http');
 const cors = require('cors');
+require('dotenv').config();
+const socket = require('./src/socket');
 
 const app = express();
 const server = http.createServer(app);
-const socket = require('./src/socket');
-const io = socket.init(server);
 
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('Could not connect to MongoDB:', err));
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 
-const gameRoutes = require('./src/routes/game');
-app.use('/api/game', gameRoutes);
+const io = socket.init(server);
 
-// WebSocket connection
 io.on('connection', (socket) => {
   console.log('New client connected');
   
@@ -33,5 +23,10 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const gameRoutes = require('./src/routes/game');
+app.use('/api/game', gameRoutes);
+
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+module.exports = { app };

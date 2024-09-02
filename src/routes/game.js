@@ -2,15 +2,20 @@ const express = require('express');
 const router = express.Router();
 const Game = require('../models/Game');
 const socket = require('../socket');
+const SocketEvents = require('../socketEvents');
 
 // POST /api/game/create
 router.post('/create', async (req, res) => {
   try {
-    const { gameId, playerId } = req.body;
+    const { gameId, playerId, maxPlayers } = req.body;
+    if (maxPlayers !== 4 && maxPlayers !== 8) {
+      return res.status(400).json({ status: 'error', message: 'maxPlayers must be 4 or 8' });
+    }
     const game = new Game({
       gameId,
       players: [playerId],
       status: 'waiting',
+      maxPlayers,
       metadata: {}
     });
     await game.save();
@@ -28,15 +33,16 @@ router.post('/join', async (req, res) => {
     if (!game) {
       return res.status(404).json({ status: 'error', message: 'Game not found' });
     }
-    if (game.players.length >= 4) {
+    if (game.players.length >= game.maxPlayers) {
       return res.status(400).json({ status: 'error', message: 'Game is full' });
     }
     game.players.push(playerId);
-    if (game.players.length === 4) {
+    if (game.players.length === game.maxPlayers) {
       game.status = 'started';
     }
+    console.log("game.players", game.players);
     await game.save();
-    socket.getIo().emit('playerJoined', { gameId, players: game.players });
+    socket.getIo().emit(SocketEvents.PLAYER_JOINED, { gameId, players: game.players });
     res.json({ status: 'success', gameState: game });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
@@ -65,7 +71,7 @@ router.post('/update', async (req, res) => {
     if (!game) {
       return res.status(404).json({ status: 'error', message: 'Game not found' });
     }
-    io.emit('gameStateUpdated', { gameId, gameState });
+    socket.getIo().emit(SocketEvents.GAME_STATE_UPDATED, { gameId, gameState });
     res.json({ status: 'success' });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
@@ -80,7 +86,7 @@ router.delete('/delete', async (req, res) => {
     if (!game) {
       return res.status(404).json({ status: 'error', message: 'Game not found' });
     }
-    io.emit('gameDeleted', { gameId });
+    socket.getIo().emit(SocketEvents.GAME_DELETED, { gameId });
     res.json({ status: 'success' });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });

@@ -4,7 +4,12 @@ let io;
 
 module.exports = {
   init: (server) => {
-    io = socketIo(server);
+    io = socketIo(server, {
+      cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+      }
+    });
     return io;
   },
   getIo: () => {
