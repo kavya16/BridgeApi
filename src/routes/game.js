@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Game = require('../models/Game');
-const { io } = require('../server');
+const socket = require('../socket');
 
 // POST /api/game/create
 router.post('/create', async (req, res) => {
@@ -36,7 +36,7 @@ router.post('/join', async (req, res) => {
       game.status = 'started';
     }
     await game.save();
-    io.emit('playerJoined', { gameId, players: game.players });
+    socket.getIo().emit('playerJoined', { gameId, players: game.players });
     res.json({ status: 'success', gameState: game });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
