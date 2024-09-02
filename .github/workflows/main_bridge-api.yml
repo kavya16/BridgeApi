@@ -57,6 +57,8 @@ jobs:
           slot-name: 'production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_81954AD1FC2A4AE194D5C8A6106F4A24 }}
           package: .
-          env: |
-             MONGODB_URI=${{ secrets.MONGODB_URI }}
-             NODE_ENV=${{ vars.NODE_ENV }}
+
+      - name: Set environment variables
+        run: |
+          az webapp config appsettings set --name bridge-api --resource-group myResourceGroup --settings MONGODB_URI=${{ secrets.MONGODB_URI }} NODE_ENV=${{ vars.NODE_ENV }}
+          
