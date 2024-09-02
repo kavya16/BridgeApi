@@ -61,7 +61,7 @@ jobs:
       - name: 'Set up App Settings'
         uses: azure/appservice-settings@v1
         with:
-         app-name: 'your-app-name'
+         app-name: 'bridge-api'
          app-settings-json: |
           [
             {
@@ -70,6 +70,6 @@ jobs:
             },
             {
               "name": "NODE_ENV",
-              "value": "${{ secrets.NODE_ENV }}"
+              "value": "${{ vars.NODE_ENV }}"
             }
           ]
