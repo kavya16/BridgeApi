@@ -1,0 +1,239 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Bridge Game API",
+      "version": "2.0.1",
+      "description": "API documentation for the Bridge Game."
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3001",
+        "description": "Local server"
+      }
+    ],
+    "paths": {
+      "/api/game/create": {
+        "post": {
+          "summary": "Create a new game session",
+          "requestBody": {
+            "description": "Game creation payload",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGame"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Game created successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CreateGameResponse"
+                  }
+                }
+              }
+            },
+            "400": { "description": "Invalid input" },
+            "500": { "description": "Server error" }
+          }
+        }
+      },
+      "/api/game/join": {
+        "post": {
+          "summary": "Join an existing game session",
+          "requestBody": {
+            "description": "Game joining payload",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JoinGame"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Joined game successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/JoinGameResponse"
+                  }
+                }
+              }
+            },
+            "400": { "description": "Invalid input or game full" },
+            "404": { "description": "Game not found" },
+            "500": { "description": "Server error" }
+          }
+        }
+      },
+      "/api/game/update": {
+        "post": {
+          "summary": "Update the game state when a player plays a card",
+          "requestBody": {
+            "description": "Game update payload",
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateGame"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Game updated successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UpdateGameResponse"
+                  }
+                }
+              }
+            },
+            "400": { "description": "Invalid input or game not started" },
+            "404": { "description": "Game not found" },
+            "500": { "description": "Server error" }
+          }
+        }
+      },
+      "/api/game/{gameId}": {
+        "delete": {
+          "summary": "Delete a game session",
+          "parameters": [
+            {
+              "name": "gameId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "ID of the game to delete"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Game deleted successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DeleteGameResponse"
+                  }
+                }
+              }
+            },
+            "404": { "description": "Game not found or already deleted" },
+            "500": { "description": "Server error" }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "CreateGame": {
+          "type": "object",
+          "required": ["gameId", "playerId", "maxPlayers"],
+          "properties": {
+            "gameId": { "type": "string" },
+            "playerId": { "type": "string" },
+            "maxPlayers": { "type": "integer", "enum": [4, 8] }
+          }
+        },
+        "CreateGameResponse": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string" },
+            "gameId": { "type": "string" }
+          }
+        },
+        "JoinGame": {
+          "type": "object",
+          "required": ["gameId", "playerId"],
+          "properties": {
+            "gameId": { "type": "string" },
+            "playerId": { "type": "string" }
+          }
+        },
+        "JoinGameResponse": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string" },
+            "gameState": { "$ref": "#/components/schemas/Game" }
+          }
+        },
+        "UpdateGame": {
+          "type": "object",
+          "required": ["gameId", "playerId", "cardPlayed"],
+          "properties": {
+            "gameId": { "type": "string" },
+            "playerId": { "type": "string" },
+            "cardPlayed": {
+              "type": "object",
+              "properties": {
+                "suit": { "type": "string", "enum": ["hearts", "diamonds", "clubs", "spades"] },
+                "value": { "type": "string" }
+              },
+              "required": ["suit", "value"]
+            }
+          }
+        },
+        "UpdateGameResponse": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string" },
+            "gameState": { "$ref": "#/components/schemas/GameState" }
+          }
+        },
+        "DeleteGameResponse": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        },
+        "Game": {
+          "type": "object",
+          "properties": {
+            "gameId": { "type": "string" },
+            "players": { "type": "array", "items": { "type": "string" } },
+            "status": { "type": "string", "enum": ["waiting", "started", "completed"] },
+            "gameState": { "$ref": "#/components/schemas/GameState" },
+            "metadata": { "type": "object" },
+            "maxPlayers": { "type": "integer" },
+            "createdAt": { "type": "string", "format": "date-time" },
+            "updatedAt": { "type": "string", "format": "date-time" }
+          }
+        },
+        "GameState": {
+          "type": "object",
+          "properties": {
+            "moves": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "playerId": { "type": "string" },
+                  "card": {
+                    "type": "object",
+                    "properties": {
+                      "suit": { "type": "string" },
+                      "value": { "type": "string" }
+                    }
+                  },
+                  "timestamp": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
