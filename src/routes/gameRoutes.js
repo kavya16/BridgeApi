@@ -1,9 +1,12 @@
 const express = require('express');
 const { body } = require('express-validator');
-const gameController = require('../controllers/gameController');
+const gameController = require('../controllers/gameControllers');
 const validateRequest = require('../middlewares/validation');
+const { createGameValidation, joinGameValidation, updateGameValidation, deleteGameValidation } = require('../validations/gameValidation');
 
 const router = express.Router();
+
+router.get('/:gameId', gameController.getGameState);
 
 /**
  * @route POST /api/game/create

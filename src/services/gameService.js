@@ -2,6 +2,11 @@ const Game = require('../models/Game');
 const logger = require('../utils/logger');
 
 class GameService {
+  async getGameState(gameId) {
+    const game = await Game.findOne({ gameId });
+    return game;
+  }
+  
   async createGame({ gameId, playerId, maxPlayers }) {
     const game = new Game({
       gameId,

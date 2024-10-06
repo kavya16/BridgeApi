@@ -105,6 +105,34 @@
         }
       },
       "/api/game/{gameId}": {
+        "get": {
+          "summary": "Get the game state",
+          "parameters": [
+            {
+              "name": "gameId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              },
+              "description": "ID of the game to retrieve"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Game state retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Game"
+                  }
+                }
+              }
+            },
+            "404": { "description": "Game not found" },
+            "500": { "description": "Server error" }
+          }
+        },
         "delete": {
           "summary": "Delete a game session",
           "parameters": [

@@ -2,6 +2,19 @@ const gameService = require('../services/gameService');
 const SocketEvents = require('../sockets/socketEvents');
 const socket = require('../sockets');
 
+exports.getGameState = async (req, res, next) => {
+  try {
+    const { gameId } = req.params;
+    const game = await gameService.getGameState(gameId);
+    if (!game) {
+      return res.status(404).json({ status: 'error', message: 'Game not found' });
+    }
+    res.json({ status: 'success', gameState: game });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.createGame = async (req, res, next) => {
   try {
     const { gameId, playerId, maxPlayers } = req.body;

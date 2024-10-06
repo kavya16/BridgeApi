@@ -8,7 +8,7 @@ const gameRoutes = require('./routes/gameRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 const socket = require('./sockets');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('../swagger/swagger.json');
+const swaggerDocument = require('./swagger/swagger.json');
 const logger = require('./utils/logger');
 
 const app = express();
